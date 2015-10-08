@@ -1,39 +1,47 @@
 @import 'nib'
 
+zeroWidthSpace = '\200B'
 cursorColor = rgba(orangered, .5)
 
 tt-writer
 	&
+	lines
 	tt-line
 		display block
 		clear both
+
+	tt-line::after
+		content zeroWidthSpace
 
 	cursor
 		position relative
 		overflow visible
 		height 100%
 		width 0
+		animation cursorPulse 1s infinite
+		color cursorColor
 
 		&::before
-			content ''
+			content zeroWidthSpace
 			absolute top left
-			width .5em
+			width 0
 			height 100%
 			box-sizing border-box
-			animation cursorPulse .75s infinite
-			background cursorColor
-
+			border-left .5em solid
 
 cursor
 	display none
 
-	.active &
-	.last &
+	tt-line .active &
+		animation none
+
+	tt-line .active &
+	tt-line .last &
 		display inline
 
 
 @keyframes cursorPulse
 	0%,100%
-		opacity 0
-	40%
 		opacity 1
+	40%
+		opacity 0

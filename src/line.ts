@@ -13,7 +13,7 @@ module typewriter.line {
 		text:string;
 		result:string = '';
 		delay:number = 100;
-		doneWritting:boolean = false;
+		doneWritting:boolean = true;
 
 		static $inject = ['$timeout','$scope'];
 
@@ -21,6 +21,8 @@ module typewriter.line {
 			$scope.$watch(() => this.text, () => {
 				this.result = '';
 				if (this.text != null) {
+					this.$scope.$emit('TypewriterLine:start', this.doneWritting);
+					this.doneWritting = false;
 					this.print(this.text.split(''));
 				}
 			});
@@ -32,12 +34,11 @@ module typewriter.line {
 				var delay = Math.round(Math.random() * this.delay);
 				this.$timeout(() => {
 					if (letter != null) {
-						this.doneWritting = false;
 						this.result = this.result + letter;
 						this.print(text);
 					} else {
 						this.doneWritting = true;
-						this.$scope.$emit('TypewriterLine:done');
+						this.$scope.$emit('TypewriterLine:done', this.doneWritting);
 					}
 				}, delay);
 			}, this.delay/2);

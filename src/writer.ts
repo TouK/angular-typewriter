@@ -13,6 +13,7 @@ module typewriter {
 		result:string[];
 		delay?:number;
 		printFn?: () => void;
+		doneWritting:boolean;
 	}
 
 	class WriterCtrl implements IWriter {
@@ -20,6 +21,8 @@ module typewriter {
 		result:string[];
 		delay:number = 100;
 		printFn:() => void;
+		doneWritting:boolean = true;
+
 		private tempLines:string[];
 
 		static $inject = ['$timeout', '$scope', '$attrs'];
@@ -29,24 +32,28 @@ module typewriter {
 					private $attrs:IWriterAttributes) {
 
 			$scope.$watch($attrs.lines, () => this.print());
-			$scope.$watch($attrs.printFn, () => {
-				this.exposePrint()
-			});
+			$scope.$watch($attrs.printFn, () => this.exposePrint());
 			$scope.$on('TypewriterLine:done', () => this.appendNext());
 		}
 
 		private print = ():void => {
 			this.tempLines = angular.copy(this.lines);
 			this.result = [];
-			if (this.tempLines) this.$timeout(() => {
-				this.result.push(this.tempLines.shift());
-			});
+			if (this.tempLines)
+				this.doneWritting = false;
+				this.$scope.$emit('Typewriter:start', this.doneWritting);
+				this.appendNext();
 		};
 
 		private appendNext():void {
 			this.$timeout(() => {
 				var line = this.tempLines.shift();
-				if (line) this.result.push(line);
+				if (line != null) {
+					this.result.push(line);
+				} else {
+					this.doneWritting = true;
+					this.$scope.$emit('Typewriter:done', this.doneWritting);
+				}
 			}, this.delay * 3);
 		}
 
@@ -65,7 +72,7 @@ module typewriter {
 			delay: '@?',
 			printFn: '=?'
 		};
-		template = "<tt-line ng-repeat='line in W.result track by $index' text='line' delay='{{W.delay}}'>";
+		template = "<lines ng-class='{active: !WL.doneWritting}'><tt-line ng-repeat='line in W.result track by $index' text='line' delay='{{W.delay}}'></lines>";
 
 		static Factory:ng.IDirectiveFactory = () => new WriterDirective();
 	}
