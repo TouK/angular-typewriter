@@ -19,7 +19,7 @@ module typewriter {
 	class WriterCtrl implements IWriter {
 		lines:string[];
 		result:string[];
-		delay:number = 100;
+		delay:number;
 		printFn:() => void;
 		doneWritting:boolean = true;
 
@@ -54,7 +54,7 @@ module typewriter {
 					this.doneWritting = true;
 					this.$scope.$emit('Typewriter:done', this.doneWritting);
 				}
-			}, this.delay * 3);
+			}, this.delay);
 		}
 
 		private exposePrint():void {

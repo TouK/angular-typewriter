@@ -33,7 +33,7 @@
 	.settings {
 		padding: 1em 2.5em;
 		vertical-align: middle;
-		border-top: 3px solid #333;
+		border-top: 3px dashed #333;
 		color: #999;
 	}
 
@@ -111,9 +111,12 @@
 	angular.module('app', ['ngAnimate','touk.typewriter'])
 		.controller('DemoCtrl', ['$scope', function ($scope) {
 			var ctrl = this;
-			ctrl.delay = 100;
+			ctrl.delay = 0;
 			ctrl.lines = [
-				'Lorem ipsum dolor sit amet justo.',
+				'1',
+				'2',
+				'Lorem ipsum dolor sit amet justo. Lorem ipsum dolor sit amet justo. Lorem ipsum dolor sit amet justo. Lorem ipsum 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 dolor sit amet justo.',
+				'Lorem ipsum dolor sit amet justo. Lorem ipsum dolor sit amet justo. Lorem ipsum dolor sit amet justo. ',
 				''
 			];
 

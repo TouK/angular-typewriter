@@ -34,15 +34,15 @@ tt-writer cursor::before {
 cursor {
   display: none;
 }
-tt-line .active cursor {
+cursor.active {
   -webkit-animation: none;
   -moz-animation: none;
   -o-animation: none;
   -ms-animation: none;
   animation: none;
 }
-tt-line .active cursor,
-tt-line .last cursor {
+cursor.active,
+cursor.last {
   display: inline;
 }
 @-moz-keyframes cursorPulse {

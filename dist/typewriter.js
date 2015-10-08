@@ -4,41 +4,51 @@ var typewriter;
     var line;
     (function (line) {
         var LineCtrl = (function () {
-            function LineCtrl($timeout, $scope) {
+            function LineCtrl($timeout, $scope, $element, $document) {
                 var _this = this;
                 this.$timeout = $timeout;
                 this.$scope = $scope;
+                this.$element = $element;
+                this.$document = $document;
                 this.result = '';
-                this.delay = 100;
+                this.temp = '';
                 this.doneWritting = true;
                 $scope.$watch(function () { return _this.text; }, function () {
-                    _this.result = '';
+                    _this.temp = '';
                     if (_this.text != null) {
                         _this.$scope.$emit('TypewriterLine:start', _this.doneWritting);
                         _this.doneWritting = false;
                         _this.print(_this.text.split(''));
                     }
                 });
+                this.$element.prepend(this.createTextNode());
             }
             LineCtrl.prototype.print = function (text) {
                 var _this = this;
-                this.print = _.debounce(function (text) {
+                this.print = _.throttle(function (text) {
                     var letter = text.shift();
-                    var delay = Math.round(Math.random() * _this.delay);
                     _this.$timeout(function () {
                         if (letter != null) {
-                            _this.result = _this.result + letter;
+                            _this.temp = _this.temp + letter;
                             _this.print(text);
+                            _this.refreshNode();
                         }
                         else {
                             _this.doneWritting = true;
                             _this.$scope.$emit('TypewriterLine:done', _this.doneWritting);
                         }
-                    }, delay);
-                }, this.delay / 2);
+                    });
+                }, this.delay);
                 this.print(text);
             };
-            LineCtrl.$inject = ['$timeout', '$scope'];
+            LineCtrl.prototype.createTextNode = function () {
+                this.textNode = document.createTextNode('');
+                return this.textNode;
+            };
+            LineCtrl.prototype.refreshNode = function () {
+                this.textNode.nodeValue = this.temp;
+            };
+            LineCtrl.$inject = ['$timeout', '$scope', '$element', '$document'];
             return LineCtrl;
         })();
         var LineDirective = (function () {
@@ -51,7 +61,7 @@ var typewriter;
                     text: '=',
                     delay: '@?'
                 };
-                this.template = "<span ng-class='{active: !WL.doneWritting, last: $last}'>{{WL.result}}<cursor>&nbsp;</cursor></span>";
+                this.template = "<cursor ng-class='{active: !WL.doneWritting, last: $last}'>&nbsp;</cursor>";
             }
             LineDirective.Factory = function () { return new LineDirective(); };
             return LineDirective;
@@ -70,7 +80,6 @@ var typewriter;
             this.$timeout = $timeout;
             this.$scope = $scope;
             this.$attrs = $attrs;
-            this.delay = 100;
             this.doneWritting = true;
             this.print = function () {
                 _this.tempLines = angular.copy(_this.lines);
@@ -95,7 +104,7 @@ var typewriter;
                     _this.doneWritting = true;
                     _this.$scope.$emit('Typewriter:done', _this.doneWritting);
                 }
-            }, this.delay * 3);
+            }, this.delay);
         };
         WriterCtrl.prototype.exposePrint = function () {
             this.printFn = this.print;
