@@ -1,0 +1,84 @@
+tt-writer,
+tt-writer tt-line {
+  display: block;
+  clear: both;
+}
+tt-writer cursor {
+  position: relative;
+  overflow: visible;
+  height: 100%;
+  width: 0;
+}
+tt-writer cursor::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.5em;
+  height: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-animation: cursorPulse 0.75s infinite;
+  -moz-animation: cursorPulse 0.75s infinite;
+  -o-animation: cursorPulse 0.75s infinite;
+  -ms-animation: cursorPulse 0.75s infinite;
+  animation: cursorPulse 0.75s infinite;
+  background: rgba(255,69,0,0.5);
+}
+cursor {
+  display: none;
+}
+.active cursor,
+.last cursor {
+  display: inline;
+}
+@-moz-keyframes cursorPulse {
+  0%, 100% {
+    opacity: 0;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: alpha(opacity=0);
+  }
+  40% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+}
+@-webkit-keyframes cursorPulse {
+  0%, 100% {
+    opacity: 0;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: alpha(opacity=0);
+  }
+  40% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+}
+@-o-keyframes cursorPulse {
+  0%, 100% {
+    opacity: 0;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: alpha(opacity=0);
+  }
+  40% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+}
+@keyframes cursorPulse {
+  0%, 100% {
+    opacity: 0;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: alpha(opacity=0);
+  }
+  40% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+  }
+}
+/*# sourceMappingURL=typewriter.css.map */
