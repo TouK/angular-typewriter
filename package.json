@@ -1,0 +1,28 @@
+{
+  "name": "angular-typewriter",
+  "version": "0.0.0",
+  "description": "Typewriter angular directive",
+  "main": "dist/typewriter.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TouK/angular-typewriter.git"
+  },
+  "keywords": [
+    "angular",
+    "directive",
+    "typewriter"
+  ],
+  "author": "Julian Wielga <j@touk.pl>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TouK/angular-typewriter/issues"
+  },
+  "homepage": "https://github.com/TouK/angular-typewriter#readme",
+  "devDependencies": {
+    "nib": ">=1.0",
+    "stylus": ">=0.52"
+  }
+}

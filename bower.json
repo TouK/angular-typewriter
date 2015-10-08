@@ -1,0 +1,25 @@
+{
+  "name": "angular-typewriter",
+  "version": "0.0.0",
+  "homepage": "https://github.com/TouK/angular-typewriter",
+  "authors": [
+    "Julian Wielga <j@touk.pl>"
+  ],
+  "description": "Typewriter angular directive",
+  "main": "dist/typewriter.js",
+  "keywords": [
+    "angular",
+    "directive",
+    "typewriter"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "angular": ">= 1.2",
+    "lodash": ">= 3.0"
+  }
+}
