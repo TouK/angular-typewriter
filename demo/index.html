@@ -4,31 +4,126 @@
 	<meta charset="UTF-8">
 	<title>angular-typewriter demo</title>
 	<!--<script src="../bower_components/angular/angular.min.js"></script>-->
+	<!--<script src="../bower_components/angular-animate/angular-animate.min.js"></script>-->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.6/angular.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.6/angular-animate.min.js"></script>
 	<!--<script src="../bower_components/lodash/lodash.min.js"></script>-->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
 	<script src="../dist/typewriter.js"></script>
 	<link rel="stylesheet" href="../dist/typewriter.css">
 </head>
 <body ng-controller="DemoCtrl as DC">
-	<label>Delay <{{DC.delay/2|number:0}} ~ {{DC.delay*3/2|number:0}}>ms</label>
-	<input type="range" min='100' max='1000' ng-model="DC.delay"/>
-	<button ng-click="DC.print()">Restart print</button>
-	<h3>
-		<tt-writer lines="DC.lines" delay="{{DC.delay}}" print-fn="DC.print"/>
-	</h3>
-	<script>
-		angular.module('app', ['touk.typewriter'])
-			.controller('DemoCtrl', function() {
-				this.delay = 100;
-				this.lines = [
-					'Lorem ipsum dolor sit amet justo.',
-					'Vestibulum ante ipsum primis in augue. Donec quis quam enim, sagittis ultricies.',
-					'Ut sodales, velit nec dui. Aliquam erat volutpat.',
-					'Pellentesque malesuada enim ut odio eget augue.',
-					'Pellentesque nunc vel massa.'
-				];
-			});
-	</script>
+<style>
+	body {
+		background: #444;
+		color: #eee;
+		font-family: sans-serif;
+	}
+
+	tt-writer {
+		font-size: 2em;
+		padding: 1.5em;
+		font-weight: 100;
+	}
+
+	tt-line + tt-line {
+		margin-top: .5em;
+	}
+	
+	.settings {
+		padding: 1em 2.5em;
+		vertical-align: middle;
+		border-top: 3px solid #333;
+		color: #999;
+	}
+
+	.settings div {
+		padding: .5em;
+		line-height: 2em;
+		vertical-align: middle;
+	}
+
+	.btn {
+		float: right;
+	}
+
+	.btn button {
+		background: #333;
+		border: none;
+		color: #eee;
+	}
+
+	.settings.ng-enter {
+		-webkit-transition: all .75s ease;
+		-moz-transition: all .75s ease;
+		-ms-transition: all .75s ease;
+		-o-transition: all .75s ease;
+		transition: all .75s ease;
+		opacity: 0;
+		-webkit-transform: translateY(4em);
+		-moz-transform: translateY(4em);
+		-ms-transform: translateY(4em);
+		-o-transform: translateY(4em);
+		transform: translateY(4em);
+	}
+	.settings.ng-enter.ng-enter-active {
+		opacity: 1;
+		-webkit-transform: translateY(0em);
+		-moz-transform: translateY(0em);
+		-ms-transform: translateY(0em);
+		-o-transform: translateY(0em);
+		transform: translateY(0em);
+	}
+
+	textarea {
+		margin-top: 3em;
+		padding: 1em;
+		width: 100%;
+		height: 8em;
+		box-sizing: border-box;
+		background: #333;
+		border: none;
+		color: #eee;
+	}
+
+	small {
+		font-size: .75em;
+		float: right;
+	}
+</style>
+<tt-writer lines="DC.lines" delay="{{DC.delay}}" print-fn="DC.print"></tt-writer>
+<div class="settings" ng-if="DC.done">
+	<div class="btn">
+		<button ng-click="DC.print()">Restart print</button>
+	</div>
+	<div class="delay">
+		Delay from {{DC.delay/2|number:0}}ms to {{DC.delay*3/2|number:0}}ms
+		<br>
+		<input type="range" min='0' max='500' ng-model="DC.delay"/>
+	</div>
+	<textarea ng-model="DC.lines" ng-list="&#10;" ng-trim="false" ng-model-options="{updateOn: 'blur'}"></textarea>
+	<div>
+		<small>ng-list clears empty lines on parse</small>
+		{{ DC.lines | json }}
+	</div>
+</div>
+<script>
+	angular.module('app', ['ngAnimate','touk.typewriter'])
+		.controller('DemoCtrl', ['$scope', function ($scope) {
+			var ctrl = this;
+			ctrl.delay = 100;
+			ctrl.lines = [
+				'Lorem ipsum dolor sit amet justo.',
+				''
+			];
+
+			ctrl.check = function(event, value) {
+				ctrl.done = value
+			};
+
+//			$scope.$on('Typewriter:start', ctrl.check);
+			$scope.$on('Typewriter:done', ctrl.check);
+		}]);
+</script>
 </body>
 </html>
