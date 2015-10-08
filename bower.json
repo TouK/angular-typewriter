@@ -6,7 +6,10 @@
     "Julian Wielga <j@touk.pl>"
   ],
   "description": "Typewriter angular directive",
-  "main": "dist/typewriter.js",
+  "main": [
+    "dist/typewriter.js",
+    "dist/typewriter.css"
+  ],
   "keywords": [
     "angular",
     "directive",
