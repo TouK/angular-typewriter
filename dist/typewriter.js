@@ -4,51 +4,42 @@ var typewriter;
     var line;
     (function (line) {
         var LineCtrl = (function () {
-            function LineCtrl($timeout, $scope, $element, $document) {
+            function LineCtrl($timeout, $scope) {
                 var _this = this;
                 this.$timeout = $timeout;
                 this.$scope = $scope;
-                this.$element = $element;
-                this.$document = $document;
-                this.result = '';
-                this.temp = '';
                 this.doneWritting = true;
-                $scope.$watch(function () { return _this.text; }, function () {
-                    _this.temp = '';
-                    if (_this.text != null) {
-                        _this.$scope.$emit('TypewriterLine:start', _this.doneWritting);
-                        _this.doneWritting = false;
-                        _this.print(_this.text.split(''));
-                    }
-                });
-                this.$element.prepend(this.createTextNode());
+                this.temp = '';
+                $scope.$watch(function () { return _this.text; }, function () { return _this.trigger(); });
             }
-            LineCtrl.prototype.print = function (text) {
+            LineCtrl.prototype.trigger = function () {
+                this.temp = '';
+                if (this.text != null) {
+                    this.$scope.$emit('TypewriterLine:start', this.doneWritting);
+                    this.doneWritting = false;
+                    this.appendNextLetter(this.text.split(''));
+                }
+            };
+            LineCtrl.prototype.appendNextLetter = function (text) {
                 var _this = this;
-                this.print = _.throttle(function (text) {
+                this.appendNextLetter = _.throttle(function (text) {
                     var letter = text.shift();
+                    var delay = Math.round(Math.random() * _this.delay);
                     _this.$timeout(function () {
                         if (letter != null) {
                             _this.temp = _this.temp + letter;
-                            _this.print(text);
-                            _this.refreshNode();
+                            _this.appendNextLetter(text);
+                            _this.print(_this.temp);
                         }
                         else {
                             _this.doneWritting = true;
                             _this.$scope.$emit('TypewriterLine:done', _this.doneWritting);
                         }
-                    });
-                }, this.delay);
-                this.print(text);
+                    }, delay);
+                }, this.delay / 2);
+                this.appendNextLetter(text);
             };
-            LineCtrl.prototype.createTextNode = function () {
-                this.textNode = document.createTextNode('');
-                return this.textNode;
-            };
-            LineCtrl.prototype.refreshNode = function () {
-                this.textNode.nodeValue = this.temp;
-            };
-            LineCtrl.$inject = ['$timeout', '$scope', '$element', '$document'];
+            LineCtrl.$inject = ['$timeout', '$scope'];
             return LineCtrl;
         })();
         var LineDirective = (function () {
@@ -61,8 +52,12 @@ var typewriter;
                     text: '=',
                     delay: '@?'
                 };
-                this.template = "<cursor ng-class='{active: !WL.doneWritting, last: $last}'>&nbsp;</cursor>";
+                this.template = "<span></span><cursor ng-class='{active: !WL.doneWritting, last: $last}'>&nbsp;</cursor>";
             }
+            LineDirective.prototype.link = function ($scope, $element, $attrs, WL) {
+                var span = $element.find('span');
+                WL.print = function (text) { return span.text(text); };
+            };
             LineDirective.Factory = function () { return new LineDirective(); };
             return LineDirective;
         })();
@@ -75,39 +70,33 @@ var typewriter;
 var typewriter;
 (function (typewriter) {
     var WriterCtrl = (function () {
-        function WriterCtrl($timeout, $scope, $attrs) {
+        function WriterCtrl($timeout, $scope) {
             var _this = this;
             this.$timeout = $timeout;
             this.$scope = $scope;
-            this.$attrs = $attrs;
             this.doneWritting = true;
-            this.print = function () {
-                _this.tempLines = angular.copy(_this.lines);
-                _this.result = [];
-                if (_this.tempLines)
-                    _this.doneWritting = false;
-                _this.$scope.$emit('Typewriter:start', _this.doneWritting);
-                _this.appendNext();
-            };
-            $scope.$watch($attrs.lines, function () { return _this.print(); });
-            $scope.$watch($attrs.printFn, function () { return _this.exposePrint(); });
-            $scope.$on('TypewriterLine:done', function () { return _this.appendNext(); });
+            $scope.$on('TypewriterLine:done', function () { return _this.appendNextLine(_this.tempLines); });
         }
-        WriterCtrl.prototype.appendNext = function () {
+        WriterCtrl.prototype.trigger = function () {
+            this.tempLines = angular.copy(this.lines);
+            this.resultLines = [];
+            if (this.tempLines)
+                this.doneWritting = false;
+            this.$scope.$emit('Typewriter:start', this.doneWritting);
+            this.appendNextLine(this.tempLines);
+        };
+        WriterCtrl.prototype.appendNextLine = function (lines) {
             var _this = this;
+            var line = lines.shift();
             this.$timeout(function () {
-                var line = _this.tempLines.shift();
                 if (line != null) {
-                    _this.result.push(line);
+                    _this.resultLines.push(line);
                 }
                 else {
                     _this.doneWritting = true;
                     _this.$scope.$emit('Typewriter:done', _this.doneWritting);
                 }
-            }, this.delay);
-        };
-        WriterCtrl.prototype.exposePrint = function () {
-            this.printFn = this.print;
+            });
         };
         WriterCtrl.$inject = ['$timeout', '$scope', '$attrs'];
         return WriterCtrl;
@@ -121,10 +110,14 @@ var typewriter;
             this.bindToController = {
                 lines: '=',
                 delay: '@?',
-                printFn: '=?'
+                printTrigger: '=?'
             };
-            this.template = "<lines ng-class='{active: !WL.doneWritting}'><tt-line ng-repeat='line in W.result track by $index' text='line' delay='{{W.delay}}'></lines>";
+            this.template = "<lines ng-class='{active: !WL.doneWritting}'><tt-line ng-repeat='line in W.resultLines track by $index' text='line' delay='{{W.delay}}'></lines>";
         }
+        WriterDirective.prototype.link = function ($scope, $element, $attrs, W) {
+            $scope.$watch($attrs.lines, function () { return W.trigger(); });
+            $scope.$watch($attrs.printTrigger, function () { W.printTrigger = function () { return W.trigger(); }; });
+        };
         WriterDirective.Factory = function () { return new WriterDirective(); };
         return WriterDirective;
     })();
