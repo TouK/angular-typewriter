@@ -117,7 +117,8 @@ var typewriter;
             this.template = "<lines ng-class='{active: !WL.doneWritting}'><tt-line ng-repeat='line in W.resultLines track by $index' text='line' delay='{{W.delay}}'></lines>";
         }
         WriterDirective.prototype.link = function ($scope, $element, $attrs, W) {
-            $scope.$watch($attrs.printTrigger, function () { W.printTrigger = function () { return W.trigger(); }; });
+            var trigger = function () { W.trigger(); };
+            $scope.$watch($attrs.printTrigger, function () { return W.printTrigger = trigger; });
         };
         WriterDirective.Factory = function () { return new WriterDirective(); };
         return WriterDirective;

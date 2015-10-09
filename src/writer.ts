@@ -70,7 +70,8 @@ module typewriter {
 		template = "<lines ng-class='{active: !WL.doneWritting}'><tt-line ng-repeat='line in W.resultLines track by $index' text='line' delay='{{W.delay}}'></lines>";
 
 		link($scope:ng.IScope, $element:ng.IAugmentedJQuery, $attrs:IWriterAttributes, W:IWriter) {
-			$scope.$watch($attrs.printTrigger, () => {W.printTrigger = () => W.trigger()});
+			var trigger = () => {W.trigger()};
+			$scope.$watch($attrs.printTrigger, () => W.printTrigger = trigger);
 		}
 
 		static Factory:ng.IDirectiveFactory = () => new WriterDirective();
