@@ -66,7 +66,6 @@
 		-o-transform: translateY(4em);
 		transform: translateY(4em);
 	}
-
 	.settings.ng-enter.ng-enter-active {
 		opacity: 1;
 		-webkit-transform: translateY(0em);
@@ -100,7 +99,7 @@
 	<div class="delay">
 		Delay between {{DC.delay/2|number:0}}ms and {{DC.delay*3/2|number:0}}ms
 		<br>
-		<input type="range" min='0' max='200' ng-model="DC.delay"/>
+		<input type="range" min='0' max='500' ng-model="DC.delay"/>
 	</div>
 	<textarea ng-model="DC.lines" ng-list="&#10;" ng-trim="false" ng-model-options="{updateOn: 'blur'}"></textarea>
 	<div>
