@@ -117,9 +117,7 @@
 				''
 			];
 
-			ctrl.check = function(event, value) {
-				ctrl.done = value
-			};
+			ctrl.check = (event, value) => ctrl.done = value;
 
 //			$scope.$on('Typewriter:start', ctrl.check);
 			$scope.$on('Typewriter:done', ctrl.check);
