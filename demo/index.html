@@ -66,6 +66,7 @@
 		-o-transform: translateY(4em);
 		transform: translateY(4em);
 	}
+
 	.settings.ng-enter.ng-enter-active {
 		opacity: 1;
 		-webkit-transform: translateY(0em);
@@ -91,15 +92,15 @@
 		float: right;
 	}
 </style>
-<tt-writer lines="DC.lines" delay="{{DC.delay}}" print-fn="DC.print"></tt-writer>
+<tt-writer lines="DC.lines" delay="{{DC.delay}}" print-trigger="DC.print"></tt-writer>
 <div class="settings" ng-if="DC.done">
 	<div class="btn">
 		<button ng-click="DC.print()">Restart print</button>
 	</div>
 	<div class="delay">
-		Delay from {{DC.delay/2|number:0}}ms to {{DC.delay*3/2|number:0}}ms
+		Delay between {{DC.delay/2|number:0}}ms and {{DC.delay*3/2|number:0}}ms
 		<br>
-		<input type="range" min='0' max='500' ng-model="DC.delay"/>
+		<input type="range" min='0' max='200' ng-model="DC.delay"/>
 	</div>
 	<textarea ng-model="DC.lines" ng-list="&#10;" ng-trim="false" ng-model-options="{updateOn: 'blur'}"></textarea>
 	<div>
@@ -111,12 +112,9 @@
 	angular.module('app', ['ngAnimate','touk.typewriter'])
 		.controller('DemoCtrl', ['$scope', function ($scope) {
 			var ctrl = this;
-			ctrl.delay = 0;
+			ctrl.delay = 100;
 			ctrl.lines = [
-				'1',
-				'2',
-				'Lorem ipsum dolor sit amet justo. Lorem ipsum dolor sit amet justo. Lorem ipsum dolor sit amet justo. Lorem ipsum 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 dolor sit amet justo.',
-				'Lorem ipsum dolor sit amet justo. Lorem ipsum dolor sit amet justo. Lorem ipsum dolor sit amet justo. ',
+				'Lorem ipsum dolor sit amet justo.',
 				''
 			];
 

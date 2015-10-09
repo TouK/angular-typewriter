@@ -30,7 +30,7 @@ module typewriter {
 
 		constructor(private $timeout:ng.ITimeoutService,
 					private $scope:ng.IScope) {
-
+			$scope.$watch(() => this.lines, () => this.trigger());
 			$scope.$on('TypewriterLine:done', () => this.appendNextLine(this.tempLines));
 		}
 
@@ -45,7 +45,7 @@ module typewriter {
 
 		private appendNextLine(lines:string[]):void {
 			var line = lines.shift();
-			//var delay = Math.round(Math.random() * this.delay);
+			var delay = Math.round(Math.random() * this.delay * 2);
 			this.$timeout(() => {
 				if (line != null) {
 					this.resultLines.push(line);
@@ -53,7 +53,7 @@ module typewriter {
 					this.doneWritting = true;
 					this.$scope.$emit('Typewriter:done', this.doneWritting);
 				}
-			});
+			}, delay);
 		}
 	}
 
@@ -70,7 +70,6 @@ module typewriter {
 		template = "<lines ng-class='{active: !WL.doneWritting}'><tt-line ng-repeat='line in W.resultLines track by $index' text='line' delay='{{W.delay}}'></lines>";
 
 		link($scope:ng.IScope, $element:ng.IAugmentedJQuery, $attrs:IWriterAttributes, W:IWriter) {
-			$scope.$watch($attrs.lines, () => W.trigger());
 			$scope.$watch($attrs.printTrigger, () => {W.printTrigger = () => W.trigger()});
 		}
 

@@ -75,6 +75,7 @@ var typewriter;
             this.$timeout = $timeout;
             this.$scope = $scope;
             this.doneWritting = true;
+            $scope.$watch(function () { return _this.lines; }, function () { return _this.trigger(); });
             $scope.$on('TypewriterLine:done', function () { return _this.appendNextLine(_this.tempLines); });
         }
         WriterCtrl.prototype.trigger = function () {
@@ -88,6 +89,7 @@ var typewriter;
         WriterCtrl.prototype.appendNextLine = function (lines) {
             var _this = this;
             var line = lines.shift();
+            var delay = Math.round(Math.random() * this.delay * 2);
             this.$timeout(function () {
                 if (line != null) {
                     _this.resultLines.push(line);
@@ -96,7 +98,7 @@ var typewriter;
                     _this.doneWritting = true;
                     _this.$scope.$emit('Typewriter:done', _this.doneWritting);
                 }
-            });
+            }, delay);
         };
         WriterCtrl.$inject = ['$timeout', '$scope', '$attrs'];
         return WriterCtrl;
@@ -115,7 +117,6 @@ var typewriter;
             this.template = "<lines ng-class='{active: !WL.doneWritting}'><tt-line ng-repeat='line in W.resultLines track by $index' text='line' delay='{{W.delay}}'></lines>";
         }
         WriterDirective.prototype.link = function ($scope, $element, $attrs, W) {
-            $scope.$watch($attrs.lines, function () { return W.trigger(); });
             $scope.$watch($attrs.printTrigger, function () { W.printTrigger = function () { return W.trigger(); }; });
         };
         WriterDirective.Factory = function () { return new WriterDirective(); };
