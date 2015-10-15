@@ -18,6 +18,7 @@
 		background: #444;
 		color: #eee;
 		font-family: sans-serif;
+		-webkit-font-smoothing: subpixel-antialiased;
 	}
 
 	tt-writer {
@@ -26,10 +27,14 @@
 		font-weight: 100;
 	}
 
-	tt-line + tt-line {
-		margin-top: .5em;
+	tt-writer tt-line {
+		display: inline-block;
 	}
-	
+
+	tt-line + tt-line {
+		margin-top: 0.5em;
+	}
+
 	.settings {
 		padding: 1em 2.5em;
 		vertical-align: middle;
@@ -38,9 +43,36 @@
 	}
 
 	.settings div {
-		padding: .5em;
+		padding: 0.5em;
 		line-height: 2em;
 		vertical-align: middle;
+	}
+
+	.settings.ng-enter {
+		-webkit-transition: all 0.75s ease;
+		-moz-transition: all 0.75s ease;
+		-o-transition: all 0.75s ease;
+		-ms-transition: all 0.75s ease;
+		transition: all 0.75s ease;
+		opacity: 0;
+		-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+		filter: alpha(opacity=0);
+		-webkit-transform: translateY(4em);
+		-moz-transform: translateY(4em);
+		-o-transform: translateY(4em);
+		-ms-transform: translateY(4em);
+		transform: translateY(4em);
+	}
+
+	.settings.ng-enter.ng-enter-active {
+		opacity: 1;
+		-ms-filter: none;
+		filter: none;
+		-webkit-transform: translateY(0em);
+		-moz-transform: translateY(0em);
+		-o-transform: translateY(0em);
+		-ms-transform: translateY(0em);
+		transform: translateY(0em);
 	}
 
 	.btn {
@@ -53,33 +85,13 @@
 		color: #eee;
 	}
 
-	.settings.ng-enter {
-		-webkit-transition: all .75s ease;
-		-moz-transition: all .75s ease;
-		-ms-transition: all .75s ease;
-		-o-transition: all .75s ease;
-		transition: all .75s ease;
-		opacity: 0;
-		-webkit-transform: translateY(4em);
-		-moz-transform: translateY(4em);
-		-ms-transform: translateY(4em);
-		-o-transform: translateY(4em);
-		transform: translateY(4em);
-	}
-	.settings.ng-enter.ng-enter-active {
-		opacity: 1;
-		-webkit-transform: translateY(0em);
-		-moz-transform: translateY(0em);
-		-ms-transform: translateY(0em);
-		-o-transform: translateY(0em);
-		transform: translateY(0em);
-	}
-
 	textarea {
 		margin-top: 3em;
 		padding: 1em;
 		width: 100%;
 		height: 8em;
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 		background: #333;
 		border: none;
@@ -87,11 +99,15 @@
 	}
 
 	small {
-		font-size: .75em;
+		font-size: 0.75em;
 		float: right;
 	}
 </style>
-<tt-writer lines="DC.lines" delay="{{DC.delay}}" print-trigger="DC.print"></tt-writer>
+<tt-writer print-trigger="DC.print">
+	<div ng-repeat="line in DC.lines track by $index + ' ' + line" ng-class="{last: $last}">
+		<tt-line delay='{{DC.delay}}'>{{ line }}</tt-line>
+	</div>
+</tt-writer>
 <div class="settings" ng-if="DC.done">
 	<div class="btn">
 		<button ng-click="DC.print()">Restart print</button>
@@ -102,22 +118,27 @@
 		<input type="range" min='0' max='500' ng-model="DC.delay"/>
 	</div>
 	<textarea ng-model="DC.lines" ng-list="&#10;" ng-trim="false" ng-model-options="{updateOn: 'blur'}"></textarea>
+
 	<div>
 		<small>ng-list clears empty lines on parse</small>
 		{{ DC.lines | json }}
 	</div>
 </div>
 <script>
-	angular.module('app', ['ngAnimate','touk.typewriter'])
+	angular.module('app', ['ngAnimate', 'touk.typewriter'])
 		.controller('DemoCtrl', ['$scope', function ($scope) {
 			var ctrl = this;
 			ctrl.delay = 100;
 			ctrl.lines = [
-				'Lorem ipsum dolor sit amet justo.',
+				'aaa',
+				'bbb',
+				'ccc',
 				''
 			];
 
-			ctrl.check = (event, value) => ctrl.done = value;
+			ctrl.check = function(event, value) {
+				ctrl.done = value;
+			};
 
 //			$scope.$on('Typewriter:start', ctrl.check);
 			$scope.$on('Typewriter:done', ctrl.check);

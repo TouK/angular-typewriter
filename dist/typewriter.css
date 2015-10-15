@@ -31,7 +31,8 @@ tt-writer cursor::before {
   box-sizing: border-box;
   border-left: 0.5em solid;
 }
-cursor {
+cursor,
+.active .last cursor {
   display: none;
 }
 cursor.active {
@@ -42,7 +43,8 @@ cursor.active {
   animation: none;
 }
 cursor.active,
-cursor.last {
+cursor.last,
+.last cursor {
   display: inline;
 }
 @-moz-keyframes cursorPulse {

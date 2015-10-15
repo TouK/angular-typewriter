@@ -30,13 +30,16 @@ tt-writer
 			border-left .5em solid
 
 cursor
-	display none
+	&
+	.active .last &
+		display none
 
 	&.active
 		animation none
 
 	&.active
 	&.last
+	.last &
 		display inline
 
 

@@ -1,59 +1,80 @@
 /// <reference path="../typings/tsd.d.ts" />
+/// <reference path="./line.ts" />
 
 module typewriter {
 
 	interface IWriterAttributes extends ng.IAttributes {
-		lines: string;
 		printTrigger?: string;
 		delay?: string|number;
 	}
 
-	interface IWriter {
-		lines:string[];
-		resultLines:string[];
+	export interface IWriter {
+		lines:typewriter.line.ILine[];
 		doneWritting:boolean;
 		delay?:number;
-		trigger: () => void;
+		trigger: (lines:typewriter.line.ILine[], force?:boolean) => void;
 		printTrigger?: () => void;
+		add: (line:typewriter.line.ILine, index?:number) => void;
+		remove: (line:typewriter.line.ILine) => void;
 	}
 
 	class WriterCtrl implements IWriter {
-		lines:string[];
-		resultLines:string[];
+		lines:typewriter.line.ILine[] = [];
 		delay:number;
 		printTrigger:() => void;
 		doneWritting:boolean = true;
 
-		private tempLines:string[];
+		private tempLines:typewriter.line.ILine[];
 
-		static $inject = ['$timeout', '$scope', '$attrs'];
+		static $inject = ['$timeout', '$scope'];
+		private timeout:ng.IPromise<void>;
 
 		constructor(private $timeout:ng.ITimeoutService,
 					private $scope:ng.IScope) {
-			$scope.$watch(() => this.lines, () => this.trigger());
-			$scope.$on('TypewriterLine:done', () => this.appendNextLine(this.tempLines));
+			$scope.$watchCollection(() => this.lines, (lines:typewriter.line.ILine[]) => {
+				this.trigger(lines);
+			});
+			$scope.$on('TypewriterLine:done', (event:ng.IAngularEvent, line:typewriter.line.ILine) => {
+				this.appendNextLine(this.lines, this.lines.indexOf(line) + 1, true);
+			});
 		}
 
-		trigger():void {
-			this.tempLines = angular.copy(this.lines);
-			this.resultLines = [];
-			if (this.tempLines)
+		trigger(lines:typewriter.line.ILine[], force?:boolean):void {
+			this.$timeout.cancel(this.timeout);
+			if (lines)
 				this.doneWritting = false;
 			this.$scope.$emit('Typewriter:start', this.doneWritting);
-			this.appendNextLine(this.tempLines);
+			this.appendNextLine(lines, 0, force);
 		}
 
-		private appendNextLine(lines:string[]):void {
-			var line = lines.shift();
+		add(line:typewriter.line.ILine, index?:number) {
+			console.log(this.lines, index, this.lines.length);
+
+			this.lines.splice(index, 0, line);
+		}
+
+		remove(line:typewriter.line.ILine) {
+			this.lines = _.without(this.lines, line);
+		}
+
+		private appendNextLine(lines:typewriter.line.ILine[], index:number, force?:boolean):void {
+			var line = lines[index];
 			var delay = Math.round(Math.random() * this.delay * 2);
-			this.$timeout(() => {
-				if (line != null) {
-					this.resultLines.push(line);
-				} else {
-					this.doneWritting = true;
-					this.$scope.$emit('Typewriter:done', this.doneWritting);
-				}
-			}, delay);
+			console.log(lines.slice(index));
+
+			if (line != null) {
+				this.timeout = this.$timeout(() => {
+					if (force || !line.doneWritting) {
+						_.forEach(lines.slice(index), (line) => line.clear());
+						line.display();
+					} else {
+						this.appendNextLine(this.lines, ++index)
+					}
+				}, delay);
+			} else {
+				this.doneWritting = true;
+				this.$scope.$emit('Typewriter:done', this.doneWritting);
+			}
 		}
 	}
 
@@ -63,14 +84,14 @@ module typewriter {
 		controller = WriterCtrl;
 		controllerAs = 'W';
 		bindToController = {
-			lines: '=',
 			delay: '@?',
 			printTrigger: '=?'
 		};
-		template = "<lines ng-class='{active: !WL.doneWritting}'><tt-line ng-repeat='line in W.resultLines track by $index' text='line' delay='{{W.delay}}'></lines>";
+		transclude = true;
+		template = "<lines ng-class='{active: !W.doneWritting}' ng-transclude></lines>";
 
 		link($scope:ng.IScope, $element:ng.IAugmentedJQuery, $attrs:IWriterAttributes, W:IWriter) {
-			var trigger = () => {W.trigger()};
+			var trigger = () => {W.trigger(W.lines)};
 			$scope.$watch($attrs.printTrigger, () => W.printTrigger = trigger);
 		}
 

@@ -1,41 +1,70 @@
 /// <reference path="../typings/tsd.d.ts" />
+/// <reference path="./writer.ts" />
 
 module typewriter.line {
 
 	interface ILineAttributes extends ng.IAttributes {
-		text:string;
 		delay?:number;
 	}
 
-	interface ILine {
-		text:string;
+	export interface ILine {
 		delay?:number;
 		doneWritting:boolean;
 		print:(text:string) => void;
-		trigger: () => void;
+		trigger: (text:string) => void;
+		display: () => void;
+		clear: () => void;
+		text:string;
 	}
 
 	class LineCtrl implements ILine {
 		text:string;
 		delay:number;
-		doneWritting:boolean = true;
+		doneWritting:boolean = null;
 		print:(text:string) => void;
 		private temp:string = '';
 
-		static $inject = ['$timeout', '$scope'];
+		static $inject = ['$transclude', '$timeout', '$scope'];
+		private timeout:ng.IPromise<void>;
+		private transclusionScope:ng.IScope;
 
-		constructor(private $timeout:ng.ITimeoutService,
+		constructor(private $transclude:ng.ITranscludeFunction,
+					private $timeout:ng.ITimeoutService,
 					private $scope:ng.IScope) {
 
-			$scope.$watch(() => this.text, () => this.trigger());
+			$transclude((clone, scope) => {
+				this.transclusionScope = scope;
+				scope.$watch(()=> clone.text(), (text) => {
+					console.log(text);
+					this.text = text;
+				});
+			});
+
+			$scope.$on('$destroy', () => {
+				this.transclusionScope.$destroy();
+			});
+
+
 		}
 
-		trigger():void {
+		display():void {
+			this.trigger(this.text);
+		}
+
+		clear():void {
+			//this.text = '';
 			this.temp = '';
-			if (this.text != null) {
-				this.$scope.$emit('TypewriterLine:start', this.doneWritting);
+			this.print('');
+			this.doneWritting = null;
+		}
+
+		trigger(text:string):void {
+			this.$timeout.cancel(this.timeout);
+			this.temp = '';
+			if (text != null) {
+				this.$scope.$emit('TypewriterLine:start', this);
 				this.doneWritting = false;
-				this.appendNextLetter(this.text.split(''));
+				this.appendNextLetter(text.split(''));
 			}
 		}
 
@@ -43,14 +72,14 @@ module typewriter.line {
 			this.appendNextLetter = _.throttle((text:string[]) => {
 				var letter = text.shift();
 				var delay = Math.round(Math.random() * this.delay);
-				this.$timeout(() => {
+				this.timeout = this.$timeout(() => {
 					if (letter != null) {
 						this.temp = this.temp + letter;
 						this.appendNextLetter(text);
 						this.print(this.temp);
 					} else {
 						this.doneWritting = true;
-						this.$scope.$emit('TypewriterLine:done', this.doneWritting);
+						this.$scope.$emit('TypewriterLine:done', this);
 					}
 				}, delay);
 			}, this.delay / 2);
@@ -62,16 +91,27 @@ module typewriter.line {
 		restrict = 'E';
 		scope = true;
 		controller = LineCtrl;
+		require = ['ttLine', '?^ttWriter'];
 		controllerAs = 'WL';
 		bindToController = {
-			text: '=',
 			delay: '@?'
 		};
-		template = "<span></span><cursor ng-class='{active: !WL.doneWritting, last: $last}'>&nbsp;</cursor>";
+		transclude = true;
+		template = "<span></span><cursor ng-class='{active: WL.doneWritting == false}'>&nbsp;</cursor>";
 
-		link($scope:ng.IScope, $element:ng.IAugmentedJQuery, $attrs:ILineAttributes, WL:ILine) {
+		link($scope:ng.IRepeatScope,
+			 $element:ng.IAugmentedJQuery,
+			 $attrs:ILineAttributes,
+			 ctrls:[typewriter.line.ILine, typewriter.IWriter]) {
+
+			var WL = ctrls[0];
+			var W = ctrls[1];
+
 			var span = $element.find('span');
 			WL.print = (text:string) => span.text(text);
+
+			W.add(WL, $scope.$index);
+			$scope.$on('$destroy', () => W.remove(WL));
 		}
 
 		static Factory:ng.IDirectiveFactory = () => new LineDirective();
