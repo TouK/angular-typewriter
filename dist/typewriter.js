@@ -7,13 +7,13 @@ var typewriter;
             var _this = this;
             this.$timeout = $timeout;
             this.$scope = $scope;
-            this.lines = [];
+            this.elements = [];
             this.doneWritting = true;
-            $scope.$watchCollection(function () { return _this.lines; }, function (lines) {
+            $scope.$watchCollection(function () { return _this.elements; }, function (lines) {
                 _this.trigger(lines);
             });
             $scope.$on('TypewriterLine:done', function (event, line) {
-                _this.appendNextLine(_this.lines, _this.lines.indexOf(line) + 1, true);
+                _this.appendNextLine(_this.elements, _this.elements.indexOf(line) + 1, true);
             });
         }
         WriterCtrl.prototype.trigger = function (lines, force) {
@@ -24,13 +24,13 @@ var typewriter;
             this.appendNextLine(lines, 0, force);
         };
         WriterCtrl.prototype.add = function (line, index) {
-            this.lines.splice(index, 0, line);
+            this.elements.splice(index, 0, line);
         };
         WriterCtrl.prototype.remove = function (line) {
-            this.lines = _.without(this.lines, line);
+            this.elements = _.without(this.elements, line);
         };
         WriterCtrl.prototype.reprint = function () {
-            this.trigger(this.lines, true);
+            this.trigger(this.elements, true);
         };
         WriterCtrl.prototype.appendNextLine = function (lines, index, force) {
             var _this = this;
@@ -43,7 +43,7 @@ var typewriter;
                         line.display();
                     }
                     else {
-                        _this.appendNextLine(_this.lines, ++index);
+                        _this.appendNextLine(_this.elements, ++index);
                     }
                 }, delay);
             }
@@ -63,13 +63,13 @@ var typewriter;
             this.controllerAs = 'W';
             this.bindToController = {
                 delay: '@?',
-                textLines: '=?',
+                lines: '=?',
                 printTrigger: '=?'
             };
             this.transclude = true;
             this.template = "<lines ng-class='{active: !W.doneWritting}'>" +
-                "<ng-transclude ng-if='!W.textLines'></ng-transclude>" +
-                "<tt-line ng-repeat='line in W.textLines track by $index + \" \" + line' ng-class='{last: WL.isLast()}' delay='{{W.delay}}'>{{ line }}</tt-line>" +
+                "<ng-transclude ng-if='!W.lines'></ng-transclude>" +
+                "<tt-line ng-repeat='line in W.lines track by $index + \" \" + line' ng-class='{last: WL.isLast()}' delay='{{W.delay}}'>{{ line }}</tt-line>" +
                 "</lines>";
         }
         WriterDirective.prototype.link = function ($scope, $element, $attrs, W) {
@@ -126,7 +126,7 @@ var typewriter;
             };
             LineCtrl.prototype.isLast = function () {
                 if (this.parent) {
-                    return this.parent.lines.length == this.parent.lines.indexOf(this) + 1;
+                    return this.parent.elements.length == this.parent.elements.indexOf(this) + 1;
                 }
                 return false;
             };
@@ -168,9 +168,9 @@ var typewriter;
             LineDirective.prototype.link = function ($scope, $element, $attrs, ctrls) {
                 var WL = ctrls[0];
                 var W = ctrls[1];
-                WL.parent = W;
                 var span = $element.find('span');
                 WL.print = function (text) { return span.text(text); };
+                WL.parent = W;
                 W.add(WL, $scope.$index);
                 $scope.$on('$destroy', function () { return W.remove(WL); });
             };

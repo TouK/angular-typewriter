@@ -71,7 +71,7 @@ module typewriter.line {
 
 		isLast():boolean {
 			if (this.parent) {
-				return this.parent.lines.length == this.parent.lines.indexOf(this)+1;
+				return this.parent.elements.length == this.parent.elements.indexOf(this)+1;
 			}
 			return false;
 		}
@@ -112,12 +112,12 @@ module typewriter.line {
 			 $attrs:ILineAttributes,
 			 ctrls:[typewriter.line.ILine, typewriter.IWriter]) {
 
-			var WL = ctrls[0];
-			var W = ctrls[1];
-			WL.parent = W;
+			var WL:typewriter.line.ILine = ctrls[0];
+			var W:typewriter.IWriter = ctrls[1];
 
 			var span = $element.find('span');
 			WL.print = (text:string) => span.text(text);
+			WL.parent = W;
 
 			W.add(WL, $scope.$index);
 			$scope.$on('$destroy', () => W.remove(WL));

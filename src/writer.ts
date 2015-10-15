@@ -4,13 +4,13 @@
 module typewriter {
 
 	interface IWriterAttributes extends ng.IAttributes {
-		textLines?: string[];
+		lines?: string[];
 		printTrigger?: string;
 		delay?: string|number;
 	}
 
 	export interface IWriter {
-		lines:typewriter.line.ILine[];
+		elements:typewriter.line.ILine[];
 		doneWritting:boolean;
 		delay?:number;
 		trigger: (lines:typewriter.line.ILine[], force?:boolean) => void;
@@ -21,7 +21,7 @@ module typewriter {
 	}
 
 	class WriterCtrl implements IWriter {
-		lines:typewriter.line.ILine[] = [];
+		elements:typewriter.line.ILine[] = [];
 		delay:number;
 		printTrigger:() => void;
 		doneWritting:boolean = true;
@@ -33,11 +33,11 @@ module typewriter {
 
 		constructor(private $timeout:ng.ITimeoutService,
 					private $scope:ng.IScope) {
-			$scope.$watchCollection(() => this.lines, (lines:typewriter.line.ILine[]) => {
+			$scope.$watchCollection(() => this.elements, (lines:typewriter.line.ILine[]) => {
 				this.trigger(lines);
 			});
 			$scope.$on('TypewriterLine:done', (event:ng.IAngularEvent, line:typewriter.line.ILine) => {
-				this.appendNextLine(this.lines, this.lines.indexOf(line) + 1, true);
+				this.appendNextLine(this.elements, this.elements.indexOf(line) + 1, true);
 			});
 		}
 
@@ -50,15 +50,15 @@ module typewriter {
 		}
 
 		add(line:typewriter.line.ILine, index?:number) {
-			this.lines.splice(index, 0, line);
+			this.elements.splice(index, 0, line);
 		}
 
 		remove(line:typewriter.line.ILine) {
-			this.lines = _.without(this.lines, line);
+			this.elements = _.without(this.elements, line);
 		}
 
 		reprint() {
-			this.trigger(this.lines, true);
+			this.trigger(this.elements, true);
 		}
 
 		private appendNextLine(lines:typewriter.line.ILine[], index:number, force?:boolean):void {
@@ -71,7 +71,7 @@ module typewriter {
 						_.forEach(lines.slice(index), (line) => line.clear());
 						line.display();
 					} else {
-						this.appendNextLine(this.lines, ++index)
+						this.appendNextLine(this.elements, ++index)
 					}
 				}, delay);
 			} else {
@@ -88,13 +88,13 @@ module typewriter {
 		controllerAs = 'W';
 		bindToController = {
 			delay: '@?',
-			textLines: '=?',
+			lines: '=?',
 			printTrigger: '=?'
 		};
 		transclude = true;
 		template = "<lines ng-class='{active: !W.doneWritting}'>" +
-			"<ng-transclude ng-if='!W.textLines'></ng-transclude>" +
-			"<tt-line ng-repeat='line in W.textLines track by $index + \" \" + line' ng-class='{last: WL.isLast()}' delay='{{W.delay}}'>{{ line }}</tt-line>" +
+			"<ng-transclude ng-if='!W.lines'></ng-transclude>" +
+			"<tt-line ng-repeat='line in W.lines track by $index + \" \" + line' ng-class='{last: WL.isLast()}' delay='{{W.delay}}'>{{ line }}</tt-line>" +
 			"</lines>";
 
 		link($scope:ng.IScope, $element:ng.IAugmentedJQuery, $attrs:IWriterAttributes, W:IWriter) {

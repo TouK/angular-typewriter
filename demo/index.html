@@ -104,10 +104,11 @@
 		float: right;
 	}
 </style>
-<tt-writer print-trigger="DC.print">
-	<p ng-repeat="line in DC.lines track by $index + ' ' + line" ng-class="{last: WL.isLast()}" tt-line delay='{{DC.delay}}'>{{ line }}</p>
-</tt-writer>
-<!--<tt-writer print-trigger="DC.print" text-lines="DC.lines" delay='{{DC.delay}}'></tt-writer>-->
+<!--<tt-writer print-trigger="DC.print">-->
+	<!--&lt;!&ndash; track by $index + ' ' + line to observe index and body for changes &ndash;&gt;-->
+	<!--<p ng-repeat="line in DC.lines track by $index + ' ' + line" ng-class="{last: WL.isLast()}" tt-line delay='{{DC.delay}}'>{{ line }}</p>-->
+<!--</tt-writer>-->
+<tt-writer print-trigger="DC.print" lines="DC.lines" delay='{{DC.delay}}'></tt-writer>
 <div class="settings" ng-if="DC.done">
 	<div class="btn">
 		<button ng-click="DC.print()">Restart print</button>
