@@ -14,12 +14,15 @@ module typewriter.line {
 		trigger: (text:string) => void;
 		display: () => void;
 		clear: () => void;
+		isLast: () => boolean;
 		text:string;
+		parent: typewriter.IWriter;
 	}
 
 	class LineCtrl implements ILine {
 		text:string;
 		delay:number;
+		parent: typewriter.IWriter;
 		doneWritting:boolean = null;
 		print:(text:string) => void;
 		private temp:string = '';
@@ -35,7 +38,6 @@ module typewriter.line {
 			$transclude((clone, scope) => {
 				this.transclusionScope = scope;
 				scope.$watch(()=> clone.text(), (text) => {
-					console.log(text);
 					this.text = text;
 				});
 			});
@@ -52,7 +54,6 @@ module typewriter.line {
 		}
 
 		clear():void {
-			//this.text = '';
 			this.temp = '';
 			this.print('');
 			this.doneWritting = null;
@@ -66,6 +67,13 @@ module typewriter.line {
 				this.doneWritting = false;
 				this.appendNextLetter(text.split(''));
 			}
+		}
+
+		isLast():boolean {
+			if (this.parent) {
+				return this.parent.lines.length == this.parent.lines.indexOf(this)+1;
+			}
+			return false;
 		}
 
 		private appendNextLetter(text:string[]):void {
@@ -88,10 +96,10 @@ module typewriter.line {
 	}
 
 	export class LineDirective implements ng.IDirective {
-		restrict = 'E';
+		restrict = 'EA';
 		scope = true;
 		controller = LineCtrl;
-		require = ['ttLine', '?^ttWriter'];
+		require = ['ttLine', '^ttWriter'];
 		controllerAs = 'WL';
 		bindToController = {
 			delay: '@?'
@@ -106,6 +114,7 @@ module typewriter.line {
 
 			var WL = ctrls[0];
 			var W = ctrls[1];
+			WL.parent = W;
 
 			var span = $element.find('span');
 			WL.print = (text:string) => span.text(text);

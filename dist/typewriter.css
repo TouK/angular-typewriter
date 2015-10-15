@@ -1,10 +1,12 @@
 tt-writer,
 tt-writer lines,
-tt-writer tt-line {
+tt-writer tt-line,
+tt-writer [tt-line] {
   display: block;
   clear: both;
 }
-tt-writer tt-line::after {
+tt-writer tt-line::after,
+tt-writer [tt-line]::after {
   content: '\200B';
 }
 tt-writer cursor {
@@ -31,8 +33,7 @@ tt-writer cursor::before {
   box-sizing: border-box;
   border-left: 0.5em solid;
 }
-cursor,
-.active .last cursor {
+cursor {
   display: none;
 }
 cursor.active {
@@ -43,8 +44,8 @@ cursor.active {
   animation: none;
 }
 cursor.active,
-cursor.last,
-.last cursor {
+lines:not(.active) cursor.last,
+lines:not(.active) .last cursor {
   display: inline;
 }
 @-moz-keyframes cursorPulse {

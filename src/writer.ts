@@ -4,6 +4,7 @@
 module typewriter {
 
 	interface IWriterAttributes extends ng.IAttributes {
+		textLines?: string[];
 		printTrigger?: string;
 		delay?: string|number;
 	}
@@ -16,6 +17,7 @@ module typewriter {
 		printTrigger?: () => void;
 		add: (line:typewriter.line.ILine, index?:number) => void;
 		remove: (line:typewriter.line.ILine) => void;
+		reprint: () => void;
 	}
 
 	class WriterCtrl implements IWriter {
@@ -48,8 +50,6 @@ module typewriter {
 		}
 
 		add(line:typewriter.line.ILine, index?:number) {
-			console.log(this.lines, index, this.lines.length);
-
 			this.lines.splice(index, 0, line);
 		}
 
@@ -57,10 +57,13 @@ module typewriter {
 			this.lines = _.without(this.lines, line);
 		}
 
+		reprint() {
+			this.trigger(this.lines, true);
+		}
+
 		private appendNextLine(lines:typewriter.line.ILine[], index:number, force?:boolean):void {
 			var line = lines[index];
 			var delay = Math.round(Math.random() * this.delay * 2);
-			console.log(lines.slice(index));
 
 			if (line != null) {
 				this.timeout = this.$timeout(() => {
@@ -85,13 +88,17 @@ module typewriter {
 		controllerAs = 'W';
 		bindToController = {
 			delay: '@?',
+			textLines: '=?',
 			printTrigger: '=?'
 		};
 		transclude = true;
-		template = "<lines ng-class='{active: !W.doneWritting}' ng-transclude></lines>";
+		template = "<lines ng-class='{active: !W.doneWritting}'>" +
+			"<ng-transclude ng-if='!W.textLines'></ng-transclude>" +
+			"<tt-line ng-repeat='line in W.textLines track by $index + \" \" + line' ng-class='{last: WL.isLast()}' delay='{{W.delay}}'>{{ line }}</tt-line>" +
+			"</lines>";
 
 		link($scope:ng.IScope, $element:ng.IAugmentedJQuery, $attrs:IWriterAttributes, W:IWriter) {
-			var trigger = () => {W.trigger(W.lines)};
+			var trigger = () => W.reprint();
 			$scope.$watch($attrs.printTrigger, () => W.printTrigger = trigger);
 		}
 

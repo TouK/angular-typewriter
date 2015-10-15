@@ -7,11 +7,14 @@ tt-writer
 	&
 	lines
 	tt-line
+	[tt-line]
 		display block
 		clear both
 
-	tt-line::after
-		content zeroWidthSpace
+	tt-line
+	[tt-line]
+		&::after
+			content zeroWidthSpace
 
 	cursor
 		position relative
@@ -30,16 +33,14 @@ tt-writer
 			border-left .5em solid
 
 cursor
-	&
-	.active .last &
-		display none
+	display none
 
 	&.active
 		animation none
 
 	&.active
-	&.last
-	.last &
+	lines:not(.active) &.last
+	lines:not(.active) .last &
 		display inline
 
 

@@ -27,9 +27,10 @@
 		font-weight: 100;
 	}
 
-	tt-writer tt-line {
-		display: inline-block;
-	}
+	/*tt-writer tt-line,*/
+	/*tt-writer [tt-line] {*/
+		/*display: inline-block;*/
+	/*}*/
 
 	tt-line + tt-line {
 		margin-top: 0.5em;
@@ -104,10 +105,9 @@
 	}
 </style>
 <tt-writer print-trigger="DC.print">
-	<div ng-repeat="line in DC.lines track by $index + ' ' + line" ng-class="{last: $last}">
-		<tt-line delay='{{DC.delay}}'>{{ line }}</tt-line>
-	</div>
+	<p ng-repeat="line in DC.lines track by $index + ' ' + line" ng-class="{last: WL.isLast()}" tt-line delay='{{DC.delay}}'>{{ line }}</p>
 </tt-writer>
+<!--<tt-writer print-trigger="DC.print" text-lines="DC.lines" delay='{{DC.delay}}'></tt-writer>-->
 <div class="settings" ng-if="DC.done">
 	<div class="btn">
 		<button ng-click="DC.print()">Restart print</button>
