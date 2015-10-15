@@ -27,6 +27,10 @@
 		font-weight: 100;
 	}
 
+	tt-writer tt-line {
+		display: block;
+	}
+
 	.settings {
 		padding: 1em 2.5em;
 		vertical-align: middle;
@@ -97,9 +101,7 @@
 </style>
 <tt-writer print-trigger="DC.print" delay='{{DC.delay}}'>
 	<h1><tt-line delay='{{DC.delay * 2}}'>typewriter</tt-line></h1>
-	<p ng-repeat="line in DC.lines track by $index">
-		<tt-line>{{ line }}</tt-line>
-	</p>
+	<p ng-repeat="line in DC.lines track by $index" tt-line>{{ line }}</p>
 </tt-writer>
 <!--<tt-writer print-trigger="DC.print" lines="DC.lines" delay='{{DC.delay}}'></tt-writer>-->
 <div class="settings" ng-if="DC.done">

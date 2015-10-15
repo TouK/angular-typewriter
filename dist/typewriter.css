@@ -3,8 +3,7 @@ tt-writer lines {
   display: block;
   clear: both;
 }
-tt-writer tt-line,
-tt-writer [tt-line] {
+tt-writer tt-line {
   display: inline-block;
 }
 tt-writer tt-line::after,

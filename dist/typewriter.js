@@ -79,7 +79,7 @@ var typewriter;
             this.transclude = true;
             this.template = "<lines ng-class='{active: W.doneWritting == false}'>" +
                 "<ng-transclude ng-if='!W.lines'></ng-transclude>" +
-                "<tt-line ng-repeat='line in W.lines track by $index + \" \" + line'>{{ line }}</tt-line>" +
+                "<tt-line ng-repeat='line in W.lines track by $index'>{{ line }}</tt-line>" +
                 "</lines>";
         }
         WriterDirective.prototype.link = function ($scope, $element, $attrs, W) {
