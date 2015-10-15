@@ -49,8 +49,8 @@ module typewriter {
 			this.appendNextLine(lines, 0, force);
 		}
 
-		add(line:typewriter.line.ILine, index?:number) {
-			this.elements.splice(index, 0, line);
+		add(line:typewriter.line.ILine) {
+			this.elements.push(line);
 		}
 
 		remove(line:typewriter.line.ILine) {
@@ -94,7 +94,7 @@ module typewriter {
 		transclude = true;
 		template = "<lines ng-class='{active: !W.doneWritting}'>" +
 			"<ng-transclude ng-if='!W.lines'></ng-transclude>" +
-			"<tt-line ng-repeat='line in W.lines track by $index + \" \" + line' ng-class='{last: WL.isLast()}' delay='{{W.delay}}'>{{ line }}</tt-line>" +
+			"<tt-line ng-repeat='line in W.lines track by $index + \" \" + line'>{{ line }}</tt-line>" +
 			"</lines>";
 
 		link($scope:ng.IScope, $element:ng.IAugmentedJQuery, $attrs:IWriterAttributes, W:IWriter) {

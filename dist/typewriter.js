@@ -23,8 +23,8 @@ var typewriter;
             this.$scope.$emit('Typewriter:start', this.doneWritting);
             this.appendNextLine(lines, 0, force);
         };
-        WriterCtrl.prototype.add = function (line, index) {
-            this.elements.splice(index, 0, line);
+        WriterCtrl.prototype.add = function (line) {
+            this.elements.push(line);
         };
         WriterCtrl.prototype.remove = function (line) {
             this.elements = _.without(this.elements, line);
@@ -69,7 +69,7 @@ var typewriter;
             this.transclude = true;
             this.template = "<lines ng-class='{active: !W.doneWritting}'>" +
                 "<ng-transclude ng-if='!W.lines'></ng-transclude>" +
-                "<tt-line ng-repeat='line in W.lines track by $index + \" \" + line' ng-class='{last: WL.isLast()}' delay='{{W.delay}}'>{{ line }}</tt-line>" +
+                "<tt-line ng-repeat='line in W.lines track by $index + \" \" + line'>{{ line }}</tt-line>" +
                 "</lines>";
         }
         WriterDirective.prototype.link = function ($scope, $element, $attrs, W) {
@@ -111,13 +111,13 @@ var typewriter;
                 this.trigger(this.text);
             };
             LineCtrl.prototype.clear = function () {
+                this.$timeout.cancel(this.timeout);
                 this.temp = '';
                 this.print('');
                 this.doneWritting = null;
             };
             LineCtrl.prototype.trigger = function (text) {
-                this.$timeout.cancel(this.timeout);
-                this.temp = '';
+                this.clear();
                 if (text != null) {
                     this.$scope.$emit('TypewriterLine:start', this);
                     this.doneWritting = false;
@@ -130,24 +130,24 @@ var typewriter;
                 }
                 return false;
             };
+            LineCtrl.prototype.getDelay = function () {
+                return this.delay || this.parent.delay || 0;
+            };
             LineCtrl.prototype.appendNextLetter = function (text) {
                 var _this = this;
-                this.appendNextLetter = _.throttle(function (text) {
-                    var letter = text.shift();
-                    var delay = Math.round(Math.random() * _this.delay);
-                    _this.timeout = _this.$timeout(function () {
-                        if (letter != null) {
-                            _this.temp = _this.temp + letter;
-                            _this.appendNextLetter(text);
-                            _this.print(_this.temp);
-                        }
-                        else {
-                            _this.doneWritting = true;
-                            _this.$scope.$emit('TypewriterLine:done', _this);
-                        }
-                    }, delay);
-                }, this.delay / 2);
-                this.appendNextLetter(text);
+                var letter = text.shift();
+                var delay = Math.round(this.getDelay() / 2 + Math.random() * this.getDelay());
+                this.timeout = this.$timeout(function () {
+                    if (letter != null) {
+                        _this.temp = _this.temp + letter;
+                        _this.appendNextLetter(text);
+                        _this.print(_this.temp);
+                    }
+                    else {
+                        _this.doneWritting = true;
+                        _this.$scope.$emit('TypewriterLine:done', _this);
+                    }
+                }, delay);
             };
             LineCtrl.$inject = ['$transclude', '$timeout', '$scope'];
             return LineCtrl;
@@ -171,8 +171,9 @@ var typewriter;
                 var span = $element.find('span');
                 WL.print = function (text) { return span.text(text); };
                 WL.parent = W;
-                W.add(WL, $scope.$index);
+                W.add(WL);
                 $scope.$on('$destroy', function () { return W.remove(WL); });
+                $scope.$watch(function () { return WL.isLast(); }, function (isLast) { return $element.toggleClass('last', isLast); });
             };
             LineDirective.Factory = function () { return new LineDirective(); };
             return LineDirective;

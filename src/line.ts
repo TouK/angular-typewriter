@@ -54,14 +54,14 @@ module typewriter.line {
 		}
 
 		clear():void {
+			this.$timeout.cancel(this.timeout);
 			this.temp = '';
 			this.print('');
 			this.doneWritting = null;
 		}
 
 		trigger(text:string):void {
-			this.$timeout.cancel(this.timeout);
-			this.temp = '';
+			this.clear();
 			if (text != null) {
 				this.$scope.$emit('TypewriterLine:start', this);
 				this.doneWritting = false;
@@ -76,22 +76,23 @@ module typewriter.line {
 			return false;
 		}
 
+		private getDelay():number {
+			return this.delay || this.parent.delay || 0;
+		}
+
 		private appendNextLetter(text:string[]):void {
-			this.appendNextLetter = _.throttle((text:string[]) => {
-				var letter = text.shift();
-				var delay = Math.round(Math.random() * this.delay);
-				this.timeout = this.$timeout(() => {
-					if (letter != null) {
-						this.temp = this.temp + letter;
-						this.appendNextLetter(text);
-						this.print(this.temp);
-					} else {
-						this.doneWritting = true;
-						this.$scope.$emit('TypewriterLine:done', this);
-					}
-				}, delay);
-			}, this.delay / 2);
-			this.appendNextLetter(text);
+			var letter = text.shift();
+			var delay = Math.round(this.getDelay() / 2 + Math.random() * this.getDelay());
+			this.timeout = this.$timeout(() => {
+				if (letter != null) {
+					this.temp = this.temp + letter;
+					this.appendNextLetter(text);
+					this.print(this.temp);
+				} else {
+					this.doneWritting = true;
+					this.$scope.$emit('TypewriterLine:done', this);
+				}
+			}, delay);
 		}
 	}
 
@@ -119,8 +120,10 @@ module typewriter.line {
 			WL.print = (text:string) => span.text(text);
 			WL.parent = W;
 
-			W.add(WL, $scope.$index);
+			W.add(WL);
 			$scope.$on('$destroy', () => W.remove(WL));
+
+			$scope.$watch(() => WL.isLast(), (isLast:boolean) => $element.toggleClass('last', isLast));
 		}
 
 		static Factory:ng.IDirectiveFactory = () => new LineDirective();

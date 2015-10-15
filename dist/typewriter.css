@@ -1,9 +1,11 @@
 tt-writer,
-tt-writer lines,
-tt-writer tt-line,
-tt-writer [tt-line] {
+tt-writer lines {
   display: block;
   clear: both;
+}
+tt-writer tt-line,
+tt-writer [tt-line] {
+  display: inline-block;
 }
 tt-writer tt-line::after,
 tt-writer [tt-line]::after {
