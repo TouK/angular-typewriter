@@ -96,9 +96,8 @@
 	}
 </style>
 <tt-writer print-trigger="DC.print" delay='{{DC.delay}}'>
-	<h1><tt-line delay='{{DC.delay * 4}}'>typewriter</tt-line></h1>
-	<!-- track by $index + ' ' + line to observe index and body for changes -->
-	<p ng-repeat="line in DC.lines track by $index + ' ' + line">
+	<h1><tt-line delay='{{DC.delay * 2}}'>typewriter</tt-line></h1>
+	<p ng-repeat="line in DC.lines track by $index">
 		<tt-line>{{ line }}</tt-line>
 	</p>
 </tt-writer>

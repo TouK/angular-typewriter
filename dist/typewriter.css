@@ -23,7 +23,8 @@ tt-writer cursor {
   animation: cursorPulse 1s infinite;
   color: rgba(255,69,0,0.5);
 }
-tt-writer cursor::before {
+tt-writer cursor::before,
+tt-writer cursor::after {
   content: '\200B';
   position: absolute;
   top: 0;
@@ -34,6 +35,14 @@ tt-writer cursor::before {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   border-left: 0.5em solid;
+}
+tt-writer cursor::after {
+  border-color: transparent;
+  -webkit-box-shadow: 0 0 1.5em;
+  box-shadow: 0 0 1.5em;
+  opacity: 0.5;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
 }
 cursor {
   display: none;

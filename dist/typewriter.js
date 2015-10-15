@@ -8,18 +8,20 @@ var typewriter;
             this.$timeout = $timeout;
             this.$scope = $scope;
             this.elements = [];
-            this.doneWritting = true;
+            this.doneWritting = null;
             $scope.$watchCollection(function () { return _this.elements; }, function (lines) {
                 _this.trigger(lines);
             });
+            $scope.$on('TypewriterLine:start', function (event, line) {
+                _this.clearNext(_this.getLineIndex(line));
+                _this.doneWritting = false;
+            });
             $scope.$on('TypewriterLine:done', function (event, line) {
-                _this.appendNextLine(_this.elements, _this.elements.indexOf(line) + 1, true);
+                _this.appendNextLine(_this.elements, _this.getLineIndex(line) + 1);
             });
         }
         WriterCtrl.prototype.trigger = function (lines, force) {
             this.$timeout.cancel(this.timeout);
-            if (lines)
-                this.doneWritting = false;
             this.$scope.$emit('Typewriter:start', this.doneWritting);
             this.appendNextLine(lines, 0, force);
         };
@@ -29,8 +31,17 @@ var typewriter;
         WriterCtrl.prototype.remove = function (line) {
             this.elements = _.without(this.elements, line);
         };
+        WriterCtrl.prototype.getLineIndex = function (line) {
+            return this.elements.indexOf(line);
+        };
         WriterCtrl.prototype.reprint = function () {
             this.trigger(this.elements, true);
+        };
+        WriterCtrl.prototype.prev = function (element) {
+            return this.elements[this.getLineIndex(element) - 1];
+        };
+        WriterCtrl.prototype.clearNext = function (index) {
+            _.forEach(this.elements.slice(index), function (line) { return line.clear(); });
         };
         WriterCtrl.prototype.appendNextLine = function (lines, index, force) {
             var _this = this;
@@ -38,12 +49,11 @@ var typewriter;
             var delay = Math.round(Math.random() * this.delay * 2);
             if (line != null) {
                 this.timeout = this.$timeout(function () {
-                    if (force || !line.doneWritting) {
-                        _.forEach(lines.slice(index), function (line) { return line.clear(); });
-                        line.display();
+                    if (line.doneWritting && !force) {
+                        _this.appendNextLine(_this.elements, ++index);
                     }
                     else {
-                        _this.appendNextLine(_this.elements, ++index);
+                        line.display();
                     }
                 }, delay);
             }
@@ -67,7 +77,7 @@ var typewriter;
                 printTrigger: '=?'
             };
             this.transclude = true;
-            this.template = "<lines ng-class='{active: !W.doneWritting}'>" +
+            this.template = "<lines ng-class='{active: W.doneWritting == false}'>" +
                 "<ng-transclude ng-if='!W.lines'></ng-transclude>" +
                 "<tt-line ng-repeat='line in W.lines track by $index + \" \" + line'>{{ line }}</tt-line>" +
                 "</lines>";
@@ -101,6 +111,11 @@ var typewriter;
                     _this.transclusionScope = scope;
                     scope.$watch(function () { return clone.text(); }, function (text) {
                         _this.text = text;
+                        if (_this.parent.doneWritting == null)
+                            return;
+                        if (_this.parent.prev(_this) && _this.parent.prev(_this).doneWritting != true)
+                            return;
+                        _this.display();
                     });
                 });
                 $scope.$on('$destroy', function () {
@@ -126,7 +141,7 @@ var typewriter;
             };
             LineCtrl.prototype.isLast = function () {
                 if (this.parent) {
-                    return this.parent.elements.length == this.parent.elements.indexOf(this) + 1;
+                    return this.parent.elements.length == this.parent.getLineIndex(this) + 1;
                 }
                 return false;
             };

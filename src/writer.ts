@@ -18,13 +18,16 @@ module typewriter {
 		add: (line:typewriter.line.ILine, index?:number) => void;
 		remove: (line:typewriter.line.ILine) => void;
 		reprint: () => void;
+		prev: (element:typewriter.line.ILine) => typewriter.line.ILine;
+		clearNext: (index:number) =>void;
+		getLineIndex: (line:typewriter.line.ILine) => number;
 	}
 
 	class WriterCtrl implements IWriter {
 		elements:typewriter.line.ILine[] = [];
 		delay:number;
 		printTrigger:() => void;
-		doneWritting:boolean = true;
+		doneWritting:boolean = null;
 
 		private tempLines:typewriter.line.ILine[];
 
@@ -36,15 +39,17 @@ module typewriter {
 			$scope.$watchCollection(() => this.elements, (lines:typewriter.line.ILine[]) => {
 				this.trigger(lines);
 			});
+			$scope.$on('TypewriterLine:start', (event:ng.IAngularEvent, line:typewriter.line.ILine) => {
+				this.clearNext(this.getLineIndex(line));
+				this.doneWritting = false;
+			});
 			$scope.$on('TypewriterLine:done', (event:ng.IAngularEvent, line:typewriter.line.ILine) => {
-				this.appendNextLine(this.elements, this.elements.indexOf(line) + 1, true);
+				this.appendNextLine(this.elements, this.getLineIndex(line) + 1);
 			});
 		}
 
 		trigger(lines:typewriter.line.ILine[], force?:boolean):void {
 			this.$timeout.cancel(this.timeout);
-			if (lines)
-				this.doneWritting = false;
 			this.$scope.$emit('Typewriter:start', this.doneWritting);
 			this.appendNextLine(lines, 0, force);
 		}
@@ -57,8 +62,20 @@ module typewriter {
 			this.elements = _.without(this.elements, line);
 		}
 
+		getLineIndex(line:typewriter.line.ILine):number {
+			return this.elements.indexOf(line);
+		}
+
 		reprint() {
 			this.trigger(this.elements, true);
+		}
+
+		prev(element:typewriter.line.ILine) {
+			return this.elements[this.getLineIndex(element)-1];
+		}
+
+		clearNext(index:number):void {
+			_.forEach(this.elements.slice(index), (line) => line.clear());
 		}
 
 		private appendNextLine(lines:typewriter.line.ILine[], index:number, force?:boolean):void {
@@ -67,11 +84,10 @@ module typewriter {
 
 			if (line != null) {
 				this.timeout = this.$timeout(() => {
-					if (force || !line.doneWritting) {
-						_.forEach(lines.slice(index), (line) => line.clear());
-						line.display();
-					} else {
+					if (line.doneWritting && !force) {
 						this.appendNextLine(this.elements, ++index)
+					} else {
+						line.display();
 					}
 				}, delay);
 			} else {
@@ -92,7 +108,7 @@ module typewriter {
 			printTrigger: '=?'
 		};
 		transclude = true;
-		template = "<lines ng-class='{active: !W.doneWritting}'>" +
+		template = "<lines ng-class='{active: W.doneWritting == false}'>" +
 			"<ng-transclude ng-if='!W.lines'></ng-transclude>" +
 			"<tt-line ng-repeat='line in W.lines track by $index + \" \" + line'>{{ line }}</tt-line>" +
 			"</lines>";

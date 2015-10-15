@@ -27,12 +27,18 @@ tt-writer
 		color cursorColor
 
 		&::before
+		&::after
 			content zeroWidthSpace
 			absolute top left
 			width 0
 			height 100%
 			box-sizing border-box
 			border-left .5em solid
+
+		&::after
+			border-color transparent
+			box-shadow 0 0 1.5em
+			opacity .5
 
 cursor
 	display none

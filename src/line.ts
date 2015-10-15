@@ -39,6 +39,9 @@ module typewriter.line {
 				this.transclusionScope = scope;
 				scope.$watch(()=> clone.text(), (text) => {
 					this.text = text;
+					if (this.parent.doneWritting == null) return;
+					if (this.parent.prev(this) && this.parent.prev(this).doneWritting != true) return;
+					this.display();
 				});
 			});
 
@@ -71,7 +74,7 @@ module typewriter.line {
 
 		isLast():boolean {
 			if (this.parent) {
-				return this.parent.elements.length == this.parent.elements.indexOf(this)+1;
+				return this.parent.elements.length == this.parent.getLineIndex(this)+1;
 			}
 			return false;
 		}
